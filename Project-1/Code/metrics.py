@@ -3,14 +3,12 @@ metrics.py — common metrics and diagnostics.
 """
 import numpy as np
 
-
 def mse(y_true, y_pred):
-    return float(np.mean((y_true - y_pred) ** 2))
-
+    return float(np.mean((y_true - y_pred)**2))
 
 def r2(y_true, y_pred):
-    mu = y_true.mean()
-    return float(1.0 - np.sum((y_true - y_pred) ** 2) / np.sum((y_true - mu) ** 2))
+    mu = np.mean(y_true)
+    return float(1.0 - np.sum((y_true - y_pred)**2) / np.sum((y_true - mu)**2))
 
 
 def l2_norm(theta):
