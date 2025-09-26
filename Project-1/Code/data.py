@@ -15,13 +15,7 @@ def build_features(X, degree, include_bias=False):
     return PolynomialFeatures(degree=degree, include_bias=include_bias).fit_transform(X)
 
 def split_and_scale(X, y, test_size=0.2, random_state=42, center_y=True):
-    """
-    Returns: X_tr_s, X_te_s, y_tr_c, y_te, scaler, y_mean
-    (matches what sweep_* expects)
-    """
-    X_tr, X_te, y_tr, y_te = train_test_split(
-        X, y, test_size=test_size, random_state=random_state
-    )
+    X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=test_size, random_state=random_state)
     scaler = StandardScaler().fit(X_tr)     # fit on TRAIN only
     X_tr_s = scaler.transform(X_tr)
     X_te_s = scaler.transform(X_te)
