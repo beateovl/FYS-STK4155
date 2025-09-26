@@ -26,7 +26,7 @@
 
 We study polynomial regression on the noisy Runge function, comparing Ordinary Least Squares (OLS), Ridge, and Lasso. Features are standardized using only training data and the target is centered so the intercept is not penalized. Performance is evaluated with test MSE/R², and we also examine gradient-descent variants.
 
-We find that OLS performs well at low degrees but overfits as degree increases (rising MSE). Ridge reduces error at higher degrees by shrinking coefficients; Lasso achieves comparable accuracy with sparser models and improved numerical stability. Using 10-fold cross-validation, the best OLS model is degree 8 (test MSE 0.010). For Ridge at fixed degree 10, the optimal λ = 0.01 yields MSE 0.0094—about 22 percent lower than OLS at the same degree (0.012). Bootstrap analysis indicates Ridge slightly increases bias but more substantially lowers variance, reducing total error. Adaptive gradient methods (e.g., Adam) converge faster than fixed step sizes. Overall, cross-validation and regularization produce more robust models than plain OLS.
+We find that OLS performs well at low degrees but overfits as degree increases (rising MSE). Ridge reduces error at higher degrees by shrinking coefficients; Lasso achieves comparable accuracy with sparser models and improved numerical stability. Using 10-fold cross-validation, the best OLS model is degree 8 (test MSE 0.010). For Ridge at fixed degree 10, the optimal $\lambda$ = 0.01 yields MSE 0.0094—about 22 percent lower than OLS at the same degree (0.012). Bootstrap analysis indicates Ridge slightly increases bias but more substantially lowers variance, reducing total error. Adaptive gradient methods (e.g., Adam) converge faster than fixed step sizes. Overall, cross-validation and regularization produce more robust models than plain OLS.
 
 \end{abstract}
 
@@ -36,7 +36,7 @@ We find that OLS performs well at low degrees but overfits as degree increases (
 \section{Introduction}
 A challenge in machine learning methods for regression is to obtain a reliable input-output relationship from data while at the same time controlling the model complexity to avoid poor generalization. While polynomials can approximate smooth functions well, high degree models are prone to numerical instability and overfitting when data is noisy or features are not properly scaled. For effective regression models we want to balance simplicity and flexibility to minimize the expected prediction error. This critical tension is summarized by the bias-variance trade-off. \cite{compfys39}. \\
 
-A model with high bias suffers from underfitting, failing to capture the complexity of the true function. A model with high variance suffers from overfitting, meaning it has learnt the noise of the training data leading to poor generalization on unseen data \cite{compfys38}. Our goal in this project is to explore methods that balance this trade-off. To obtain models that are both stable and accurate, we make use of regularization and resampling techniques. Especially for multicollinearity issues we benefit from Ridge and Lasso regression, as they introduce a penalty term to the MSE cost function forcing the model parameters towards smaller magnitude which reduce variance. \\
+A model with high bias suffers from underfitting, failing to capture the complexity of the true function. A model with high variance suffers from overfitting, meaning it has learnt the noise of the training data leading to poor generalization on unseen data \cite{compfys38}, \cite{hastie}. Our goal in this project is to explore methods that balance this trade-off, as shown in \ref{fig:biasvariance}. To obtain models that are both stable and accurate, we make use of regularization and resampling techniques. Especially for multicollinearity issues we benefit from Ridge and Lasso regression, as they introduce a penalty term to the MSE cost function forcing the model parameters towards smaller magnitude which reduce variance. \\
 
 In the project we will use the Runge function
 
@@ -69,9 +69,16 @@ I used ChatGPT to help me make a plan for how to structure the code for this pro
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.5\linewidth]{Figures/puppy.jpg}
-    \caption{Bias–variance trade-off for polynomial regression on a noisy 1D function}
-    \label{fig:puppy}
+    \includegraphics[width=0.5\linewidth]{Project-1/Figures/bias_variance_tradeoff.png}
+    \caption{Bias–variance trade-off for polynomial regression on a noisy 1D function. For each polynomial degree on the x-axis, we see the corresponding MSE, squared bias and variance. As model complexity increases, squared bias decreases and variance increases. MSE is smallest around degree 10, in the intermediate window, showing how simpler models underfit (high bias) and complex models overfit (high variance).}
+    \label{fig:biasvariance}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\linewidth]{Project-1/Figures/heatmap.png}
+    \caption{B}
+    \label{fig:biasvariance}
 \end{figure}
 
 
