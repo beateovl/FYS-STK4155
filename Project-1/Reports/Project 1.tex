@@ -44,9 +44,9 @@ In the project we will use the Runge function
     f(x) = \frac{1}{1 + 25x^2}
 \end{equation}
 
-to create a synthetic dataset of evenly spaced data points. We use this function to study how fitting it with high-polynomials illustrates the issue with interpolation instability and overfitting, which is a known phenomena useful for studying regularization methods \cite{compfys}. (ref https://en.wikipedia.org/wiki/Runge%27s_phenomenon). \\
-\\
-We first look at fitting OLS up to degree 15 on the Runge function in part (a), where we evaluate the accuracy with MSE and $R^2$ vs degree. In part (b) we study the penalty term $\lambda$ and it's relationship to the polynomial degree again using MSE and $R^2$ analysis. In part (c-f) we replace the equations with gradient-based solvers and examine convergence under different step sizes. In part (g) we implement bootstrap to separate the error into bias and variance, to explore the effect polynomial degree and sample size will have. Part (h) implements k-fold cross-validation and compares these test errors to the bootstrap estimates. In the end, we will have a method for diagnosing underfitting and overfitting, and selecting polynomial degrees and penalty terms that work well.  
+to create a synthetic dataset of evenly spaced data points. We use this function to study how fitting it with high-polynomials illustrates the issue with interpolation instability and overfitting, which is a known phenomena useful for studying regularization methods \cite{wikipedia-runge}. \\
+
+We first look at fitting OLS up to degree 15 on the Runge function in part (a), where we evaluate the accuracy with MSE and $R^2$ vs degree. In part (b) we study the penalty term $\lambda$ and it's relationship to the polynomial degree again using MSE and $R^2$ analysis. In part (c-f) we replace the equations with gradient-based solvers and examine convergence under different step sizes. In part (g) we implement bootstrap to separate the error into bias and variance, to explore the effect polynomial degree and sample size will have. Part (h) implements k-fold cross-validation and compares these test errors to the bootstrap estimates. In the end, we will have a method for diagnosing underfitting and overfitting, and selecting polynomial degrees and penalty terms that work well, as shown in \ref{fig:heatmap}. 
 
 
     
@@ -77,8 +77,8 @@ I used ChatGPT to help me make a plan for how to structure the code for this pro
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.5\linewidth]{Project-1/Figures/heatmap.png}
-    \caption{B}
-    \label{fig:biasvariance}
+    \caption{Test mean-squared error (MSE) for Ridge regression as we change the polynomial degree as a function of regularization strength $\lambda$.Each cell show the MSE for one degree and one value of $\lambda$. Lighter color represents higher MSE and higher error. We see that higher degree models fit the data better, with a smaller $\lambda$. }
+    \label{fig:heatmap}
 \end{figure}
 
 
