@@ -34,9 +34,9 @@ We find that OLS performs well at low degrees but overfits as degree increases (
 \maketitle
 
 \section{Introduction}
-A challenge in machine learning methods for regression is to obtain a reliable input-output relationship from data while at the same time controlling the model complexity to avoid poor generalization. While polynomials can approximate smooth functions well, high degree models are prone to numerical instability and overfitting when data is noisy or features are not properly scaled. For effective regression models we want to balance simplicity and flexibility to minimize the expected prediction error. This critical tension is summarized by the bias-variance trade-off. (Ref week 39, summing up. ). \\
+A challenge in machine learning methods for regression is to obtain a reliable input-output relationship from data while at the same time controlling the model complexity to avoid poor generalization. While polynomials can approximate smooth functions well, high degree models are prone to numerical instability and overfitting when data is noisy or features are not properly scaled. For effective regression models we want to balance simplicity and flexibility to minimize the expected prediction error. This critical tension is summarized by the bias-variance trade-off. \cite{compfys39}. \\
 
-A model with high bias suffers from underfitting, failing to capture the complexity of the true function. A model with high variance suffers from overfitting, meaning it has learnt the noise of the training data leading to poor generalization on unseen data. (Ref week 38, Another Example from Scikit-Learn’s Repository). Our goal in this project is to explore methods that balance this trade-off. To obtain models that are both stable and accurate, we make use of regularization and resampling techniques. Especially for multicollinearity issues we benefit from Ridge and Lasso regression, as they introduce a penalty term to the MSE cost function forcing the model parameters towards smaller magnitude which reduce variance. \\
+A model with high bias suffers from underfitting, failing to capture the complexity of the true function. A model with high variance suffers from overfitting, meaning it has learnt the noise of the training data leading to poor generalization on unseen data \cite{compfys38}. Our goal in this project is to explore methods that balance this trade-off. To obtain models that are both stable and accurate, we make use of regularization and resampling techniques. Especially for multicollinearity issues we benefit from Ridge and Lasso regression, as they introduce a penalty term to the MSE cost function forcing the model parameters towards smaller magnitude which reduce variance. \\
 
 In the project we will use the Runge function
 
@@ -46,7 +46,7 @@ In the project we will use the Runge function
 
 to create a synthetic dataset of evenly spaced data points. We use this function to study how fitting it with high-polynomials illustrates the issue with interpolation instability and overfitting, which is a known phenomena useful for studying regularization methods \cite{compfys}. (ref https://en.wikipedia.org/wiki/Runge%27s_phenomenon). \\
 \\
-We first look at fitting OLS up to degree 15 on the Runge function in part a, where we evaluate the accuracy with MSE and $R^2$ vs degree. In part b we study the penalty term $\lambda$ and it's relationship to the polynomial degree again using MSE and $R^2$ analysis. In part c-f we replace the equations with gradient-based solvers and examine convergence under different step sizes. In part g we implement bootstrap to separate the error into bias and variance, to explore the effect polynomial degree and sample size will have. Part h implements k-fold cross-validation and compares these test errors to the bootstrap estimates. In the end, we will have a method for diagnosing underfitting and overfitting, and selecting polynomial degrees and penalty terms that work well.  
+We first look at fitting OLS up to degree 15 on the Runge function in part (a), where we evaluate the accuracy with MSE and $R^2$ vs degree. In part (b) we study the penalty term $\lambda$ and it's relationship to the polynomial degree again using MSE and $R^2$ analysis. In part (c-f) we replace the equations with gradient-based solvers and examine convergence under different step sizes. In part (g) we implement bootstrap to separate the error into bias and variance, to explore the effect polynomial degree and sample size will have. Part (h) implements k-fold cross-validation and compares these test errors to the bootstrap estimates. In the end, we will have a method for diagnosing underfitting and overfitting, and selecting polynomial degrees and penalty terms that work well.  
 
 
     
@@ -70,7 +70,7 @@ I used ChatGPT to help me make a plan for how to structure the code for this pro
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.5\linewidth]{Figures/puppy.jpg}
-    \caption{My dog.}
+    \caption{Bias–variance trade-off for polynomial regression on a noisy 1D function}
     \label{fig:puppy}
 \end{figure}
 
