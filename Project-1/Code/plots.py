@@ -29,17 +29,25 @@ import matplotlib.pyplot as plt
 """
 General theta norm plot function. 
 x can be degrees or lambdas, norms is array of L2 norms taken from theta.
-Shows how coefficient size changes with model complexity.
+Shows how coefficient size changes with model complexity. 
 """
-def plot_theta_norms(x, norms, xlabel, title=r'Coefficient size $\|\theta\|_2$', savepath=None): 
+def plot_theta_norms(x, norms, xlabel,
+                     title=r'Coefficient size $\|\theta\|_2$',
+                     savepath=None, logx=False):
     fig = plt.figure(figsize=(8, 4))
-    plt.plot(x, norms, 'r-x')
-    plt.xlabel(xlabel); plt.ylabel(r'$\|\theta\|_2$')
-    plt.title(title); plt.grid(True, ls='--', alpha=0.4)
+    if logx: 
+        plt.semilogx(x, norms, 'r-x')   # log x-axis
+    else:
+        plt.plot(x, norms, 'r-x') # linear x-axis
+    plt.xlabel(xlabel)
+    plt.ylabel(r'$\|\theta\|_2$')
+    plt.title(title)
+    plt.grid(True, ls='--', alpha=0.4)
     fig.tight_layout()
     if savepath is not None:
         fig.savefig(savepath, dpi=200, bbox_inches="tight", pad_inches=0.2)
     plt.show()
+
 
 "Ridge plot function. Shows MSE and R2 vs lambda."
 def plot_ridge_curves(lambdas, mse_vals, r2_vals, title="Ridge vs λ", savepath=None):
