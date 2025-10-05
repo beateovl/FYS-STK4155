@@ -12,6 +12,7 @@
 \usepackage{hyperref}         % automagic cross-referencing 
 \usepackage{float}			  % force placement of tables and figures
 
+
 \begin{document}
 	
 \title{Project 1 \\
@@ -48,16 +49,217 @@ to create a synthetic dataset of evenly spaced data points. We use this function
 
 We first look at fitting OLS up to degree 15 on the Runge function in part (a), where we evaluate the accuracy with MSE and $R^2$ vs degree. In part (b) we study the penalty term $\lambda$ and it's relationship to the polynomial degree again using MSE and $R^2$ analysis. In part (c-f) we replace the equations with gradient-based solvers and examine convergence under different step sizes. In part (g) we implement bootstrap to separate the error into bias and variance, to explore the effect polynomial degree and sample size will have. Part (h) implements k-fold cross-validation and compares these test errors to the bootstrap estimates. In the end, we will have a method for diagnosing underfitting and overfitting, and selecting polynomial degrees and penalty terms that work well, as shown in \ref{fig:heatmap}. 
 
+\section{Theory and Methods}
 
-    
-\section{Methods}\label{section:methods}
+\subsection{Theory}
+\label{subsection:theory}
+Regression analysis assumes that the output data can be represented by a continous function f(x) plus noise. In linear regression this function is approximated linearly with 
 
-\subsection{Method 1/X}
+\begin{equation}
+    \overline{y} = X \theta
+\end{equation}
+This is a supervised regression problem where we assume that the true data is generated from a noisy model expressed as: 
+
+\begin{equation}
+y = f(x)+\varepsilon
+\end{equation}
+
+where in this project the true signal f(x) is expressed as the Runge function:
+
+\begin{equation}
+    f(x) = \frac{1}{1 + 25x^2}
+    \label{eq:runge}
+\end{equation}
+
+and $\varepsilon$ represents the random normal distributed noise. 
+
+The input domain for x is [-1,1] with additive Gaussian noise. 
+\subsubsection{Ordinary Least Squares (OLS)}
+
+The standard approach for OLS is to minimize the Mean Squared Error (MSE) cost function $C (\theta)$: 
+
+\begin{equation}
+    \min_{\theta\in\mathbb{R}^p} \; C(\theta)
+= \frac{1}{n}\,\lVert y - X\theta \rVert_2^2
+\end{equation}
+
+Minimizing this function analytically leads to the solution for optimal parameters $\hat{\theta}_{\text{OLS}}$
+
+\begin{equation}
+\hat{\theta}_{\text{OLS}} = (X^\top X)^{-1} X^\top y
+\end{equation}
+
+The OLS estimator is unbiased, meaning the expectation value $\mathbb{E}\!\left[\hat{\theta}_{\text{OLS}}\right]$ equals the true parameter value $\theta$. The existence of a solution to OLS depends on invertibility of the Hessian matrix $H=X^TX$. Problems can arise if the design matrix X is high dimensional or if its columns are linearly dependent (known as super-collinearity), potentially leading to a singular (non-invertible) $X^TX$ matrix. \\
+
+To address the issues described above we can use regularized regression like Ridge and Lasso. They add a penalty term to the standard OLS cost function. \\
+
+\subsubsection{Ridge regression ($L_2$ regularization)} 
+
+Ridge regression adds an $L_2$ norm penalty to the OLS cost function, controlled by a hyperparameter $\lambda \ge 0$
+
+\begin{equation}
+\min_{\theta \in \mathbb{R}^p}
+\quad
+\frac{1}{n}\,\lVert y - X\theta \rVert_2^2
+\;+\;
+\lambda \lVert \theta \rVert_2^2
+\end{equation}
+
+We find the optimal Ridge parameters $\hat{\theta}_{\text{Ridge}}$ analytically: 
+
+\begin{equation}
+    \hat{\theta}_{\text{Ridge}}
+= (X^\top X + \lambda I)^{-1} X^\top y
+\end{equation}
+
+Adding $\lambda I$ ensures the matrix $X^\top X + \lambda I)$ is invertible for finite $\lambda$, solving the singularity issues OLS regression can have. In contrast to OLS, the Ridge estimator is biased for any $\lambda \ge 0$, but we also reduce variance. \\
+
+\subsubsection{Lasso regression ($L_1$ regularization)}
+
+The $L_1$ term is classified as 
+
+\begin{equation}
+\min_{\theta \in \mathbb{R}^p}
+\quad
+\frac{1}{n}\,\lVert y - X\theta \rVert_2^2
+\;+\;
+\lambda \lVert \theta \rVert_1
+\end{equation}
+
+where $\lVert \theta \rVert_1 = \sum_{i=1}^p \lvert \theta_i \rvert$. \\
+
+The Lasso cost function normally does not yield an analytical solution. We need to solve it numerically, typically with variants of gradient descent methods. A key difference between Lasso and Ridge, is that where Ridge shrinks some of the coefficiants towards zero, Lasso will reduce some of them entirely to zero. This means that where Ridge keeps all the coefficients, Lasso only keeps a subset of them. This can be an advantage if we want sparser models (and if the true signal is sparse), but Ridge has an advantage where the true signal is more dense and we have multicollinearity. Using Lasso in the wrong way can make it underfit and oversimplify. 
+
+\subsubsection{Optimization algorithms}
+
+\textit{4.1 Convergence and divergence} \\
+
+The MSE cost function of both OLS and Ridge are convex functions, where for a convex function any local minimum is also a global minimum, guaranteeing that the Gradient Descent (GD) cost function is also a convex function if the learning rate is sufficiently small. \\
+
+\textit{4.2 Gradient descent (GD), fixed learning rate $\eta$} \\
+
+Plain GD iteratively updates the parameters $\theta$ by taking a step proportional to the negative gradient of the cost function $C(\theta)$: 
+
+\begin{equation}
+\theta_{k+1} \;=\; \theta_k \;-\; \eta \,\nabla_{\theta} C(\theta_k)
+\end{equation}
+
+Simply put, the step size is the same for every parameter. \\ 
+
+\textit{4.3 Stochastic gradient descent (SGD) } \\
+
+SGD introduces randomness and computational efficiency by approximating the full gradient $\nabla_{\theta} C(\theta)$ by summing over a subset of the data $B_k$: 
+
+\begin{equation}
+    \theta_{j+1}
+= \theta_j - \eta_j \sum_{i \in B_k} \nabla_{\theta}\, c_i(x_i,\theta_j)
+\end{equation}
+
+\textit{4.4 Momentum and Adaptive Methods (AdaGrad, RMSProp, ADAM) } \\
+
+These methods modify the learning rate $\eta$ to speed up convergence: 
+
+\begin{itemize}
+    \item Momentum: moving average over the gradient =?
+    \item AdaGrad: Each parameter has its own step size. If the parameter sees big gradients, shrink the step size; and if it rarely changes, increase the step size larger. 
+    \item RMSProp: Similar to AdaGrad but uses an exponential moving average of squared gradients, to avoid AdaGrad's learning rate goes to zero problems. 
+    \item ADAM: Combines momentum and RMSProp. Tracks average gradient (momentum) and average squared gradient (RMSProp), then bias-correct them early on. It is fast and stable on noisy and complex data. 
+\end{itemize}
+
+\subsubsection{Evaluation metrics}
+
+\textit{5.1 Mean squared error (MSE)} \\
+
+MSE is the squared difference between the true values ($y_i$) and the model's predicted values ($\overline{y_i}$). It's squared to punish the big differences more than the small ones, and to avoid positives/negatives canceling each other out. The lower value the better (smaller error). \\
+
+Its mathematical expression is 
+
+\begin{equation}
+    \text{MSE}(y, \tilde{y}) = \frac{1}{n} \sum_{i=0}^{n-1} (y_i - \tilde{y}_i)^2 
+\end{equation}
+
+It's best to use MSE to optimize and see absolute error size. MSE is sensitive to outliers. \\
+
+\textit{5.2 $R^2$ score function} \\
+
+The $R^2$ score function represents how much better your model is than just measuring the mean of the training data. It's represented as a quantile, where 1 equals perfect predictions and 0 means no better predictions than the mean, so a high value is better. Definition: 
+
+\begin{equation}
+    R^2 \;=\; 1 \;-\; \frac{\sum_{i=1}^n (y_i - \hat y_i)^2}{\sum_{i=1}^n (y_i - \bar y_{\text{train}})^2}
+\end{equation}
+
+We use the $R^2$ as a score for how good the fit of our model is. 
+
+\subsubsection{Bias-Variance tradeoff}
+
+The MSE can be decomposed into three fundamental components: 
+
+\begin{equation}
+    \mathbb{E}\!\big[(y-\tilde y)^2\big]
+= \operatorname{Bias}^2[\tilde y]
++ \operatorname{Var}[\tilde y]
++ \sigma^2
+\end{equation}
+
+\begin{itemize}
+    \item Bias squared ($\operatorname{Bias}^2[\tilde y]$): Represents the error due to simplifying assumptions in the model (e.g. modeling a complex non-linear function using a low-order polynomial). 
+    \item Variance ($\operatorname{Var}[\tilde y]$): Measures how much the predicted values $\overline{y}$ changes over different training data sets. Highly flexible models usually have high variance. 
+    \item Irreducible error ($\sigma^2$): The variance of the noise inherent in the data, which cannot be reduced by the model. 
+\end{itemize}
+
+The Bias-Variance trade off represents the relationship between a model's complexity (bias) and its sensitivity to the training data (variance). 
+A simple model (low complexity) has high bias and low variance. 
+A complex model (high flexibility) has low bias and high variance, adapting too closely to the noise in the training data. With Ridge and Lasso we introduce a small bias, but in return we achieve a greater reduction in variance, usually resulting in lower expected test error (MSE) than with OLS. 
+
+\subsubsection{Generalization error estimators}
+
+\subsubsubsection{Hold out}
+
+Split the data randomly into training and test data sets. For each model complexity (polynomial degree or regularization factor $\lambda$) we first fit on train, then compute test and train MSE. As complexity increases, train MSE usually decreases, while test MSE will have a characteristic U-shape: high error from underfitting at low complexity, a good fit in the middle and overfitting at high complexity. This helps us choose the complexity that minimizes test MSE. Understanding the relationship between test errors, train errors and model complexity is fundamental to understanding the bias-variance trade-off. 
+
+\subsubsubsection{Bootstrap}
+
+We use our training dataset and re-draw samples from it (with replacement), several times. We then fit our model to the new datasets, to see how predictions change. For each test point we compute average prediction, variance, MSE, and squared bias. This tells us if our model is stable (low variance) or touchy (high variance) as we nudge the data. 
+
+\subsubsubsection{K-fold Cross-Validation (CV)}
+
+K-fold CV is a resampling technique designed to avoid issues where random splitting might lead to an unbalanced influence of certain samples on model building or evaluation. We split the data into K equal parts (or folds). For each setting (degree or regularization parameter) we train on K-1 fold, and evaluate on the left-out fold. We repeat this so every fold is the test set once. Average over the K-errors to get CV-MSE. This way we train and split more than just once, which helps if data is sparse. Using CV-MSE we can pick the best complexity and retrain with the chosen complexity.  
+
+\subsubsection{Scaling, centering and data splitting}
+
+Standardizing or rescaling data is crucial for numerical stability and model performance, especially if the design matrix X contains features on drastically different scales, which can happen if using high-degree polynomials (as columns with high polynomials would explode or vanish). Putting all features on a comparable scale avoids letting large-scale features dominate the $X^TX$ matrix. In Ridge or Lasso where we penalize the size of the coefficients, we need a comparable scale so the strength of the regularization parameter $\lambda$ has a consistent meaning across features. \\
+
+We split the data into training and testing data. The purpose of the testing data is to simulate unseen data to evaluate a model's performance. It is important to split the data before doing any kind of standardization, as this keeps the test data "hidden" from the model. We only standardize the training data (this action let's the model "see" the data, which is why we don't do it on the test data). So after fitting the transformation parameters into the training data, we apply the fitted transformation to both the test and the training matrix. The test set must be transformed using the mean and standard deviation derived from the training set, and not itself. When we use K-fold CV, this principle extends to each fold. When using a fold as the test set, the standardization parameters must be calculated from the other folds (the K-1 folds). 
+
+\subsection{Methods - Implementation}
+\label{section:methods}
+
+We will do a regression analysis by implementing stepwise the methods talked about in the Theory section for several polynomial degrees. Through all our tests we will use the Runge function \eqref{eq:runge}, and we will evaluate the methods using MSE and $R^2$. 
 
 
+\subsubsection{Generating our data set and preprocessing}
+ \label{subsec:data}
 
-\subsection{Implementation}
+We study supervised regression of noisy observations 
 
+\begin{equation}
+    y = f(x) + \varepsilon, \qquad \varepsilon \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+where $f(x)$ is the Runge function \eqref{eq:runge} on [-1,1]. In our code, synthetic data is generated using the \texttt{make\_data(n=300, noise\_sd=0.3, seed=42)} function in data.py. It generates n input points uniformly spaced in the [-1,1] interval, evaluates Runge function at these points and adds Gaussian noise, where we end up with two arrays as the output, x (inputs) and y (targets). We fix the seed (\texttt{seed=42})throughout the calculations so the results are reproducible by using the function \texttt{ rng = np.random.default\_rng(seed) }.  \\
+
+To give the model the flexibility to capture the shape of the curve, we expand each scalar input (x) into polynomial features using \texttt{build\_features(x,\ degree=p,\ include\_bias=False)} function, where the output is our design matrix. This produces columns with $x, x^2, x^3 .. x^p$ where include\_bias=False, means we omit the intercept column. Each column represents the complexity we have chosen for our model. We handle the intercept separately by centering the training targets and adding back the mean at prediction time. We do this because the intercept column contribute nothing to the standardizations, and we don't want Ridge/Lasso to penalize the intercept column. After, we split the dataset into train and test. The StandardScaler function is fitted on the training matrix, then after we scale both training and test matrix with the training mean and std. We also center the training targets by subtracting their training mean. This is the procedure for standardization we will use throughout the project, apart from when we implement k-fold CV, where we need to tweak our preprocessing procedure a little. We will go into detail about this later in this section. \\
+
+\subsubsection{Ordinary Least Square (OLS) for the Runge function}
+\label{subsec:ols}
+
+We start with the simplest closed-form model; OLS. The OLS find a set of coefficients that matches the model's predictions as close as possible to the observed targets. In our implementation (\texttt{ fit\_ols}) we use the data set generated and preprocessing techniques described in Section \ref{subsec:data}, and solve the normal equations directly. The output from this are the parameters $\theta$. We calculate MSE and $R^2$ to evaluate the model's fit over the different polynomial degrees. We expect that the method will perform more poorly when increasing the polynomial degree. We also plot how the noise affects MSE and $R^2$. We expect a noise free model to work much better at higher polynomials than if we implement noise. We plot a noise-free, minor noise and heavy noise scenario with MSE vs $R^2$ to see the effect. For the MSE we expect a U-shaped curve where the intermediate polynomial degrees are the best fit, and for the $R^2$ we expect the same effect, with an upside down U-shaped curve, where the low degrees and higher degrees are bad fits. We will also plot the parameters $\theta$ vs polynomial degree. We expect the parameter size to blow up as the degree increases. FIX \\
+
+To make our model behave better with high-degree polynomials, we implement the $L_2$ norm penalty, Ridge regularization. \\
+
+\subsubsection{Adding Ridge regression for the Runge function}
+
+Data and polynomial features are produced by the same utilities explained in Section \ref{subsec:ols}. In \texttt{def fit\_ridge(X, y\_c, lam, n\_factor=True)} we add the $L_2$ term to the $X^TX$ term from OLS so this becomes $X^TX + \lambda I$ which reduce variance at the cost of small bias, but improving on MSE. 
 
 \subsection{Use of AI tools}
 	
@@ -65,18 +267,28 @@ I used ChatGPT to help me make a plan for how to structure the code for this pro
 	
 \section{Results and Discussion}\label{section:results} 
 
+\subsection{Ordinary Least Square (OLS) for the Runge function}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{Project-1/Figures/runge_ols_mse_r2_vs_degree.png}
+    \caption{Test MSE vs polynomial degree. }
+    \label{fig:ols_vs_degree}
+\end{figure}
+
+\subsection{}
 
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.5\linewidth]{Project-1/Figures/bias_variance_tradeoff.png}
+    \includegraphics[width=1\linewidth]{Project-1/Figures/bias_variance_tradeoff.png}
     \caption{Bias–variance trade-off for polynomial regression on a noisy 1D function. For each polynomial degree on the x-axis, we see the corresponding MSE, squared bias and variance. As model complexity increases, squared bias decreases and variance increases. MSE is smallest around degree 10, in the intermediate window, showing how simpler models underfit (high bias) and complex models overfit (high variance).}
     \label{fig:biasvariance}
 \end{figure}
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.5\linewidth]{Project-1/Figures/heatmap.png}
+    \includegraphics[width=1\linewidth]{Project-1/Figures/heatmap.png}
     \caption{Test mean-squared error (MSE) for Ridge regression as we change the polynomial degree as a function of regularization strength $\lambda$.Each cell show the MSE for one degree and one value of $\lambda$. Lighter color represents higher MSE and higher error. We see that higher degree models fit the data better, with a smaller $\lambda$. }
     \label{fig:heatmap}
 \end{figure}
