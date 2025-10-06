@@ -77,7 +77,7 @@ def sweep_ridge(X_full, y, split_func, degree, lambdas, n_factor=True):
 
 #OLD
 
-""" "OLS with closed-form solution (normal equations)."
+""" """ "OLS with closed-form solution (normal equations)."
 def fit_ols(X, y_c):
     # Closed-form OLS (no intercept; y is centered)
     XT_X = X.T @ X # X^T X
@@ -91,9 +91,9 @@ def fit_ridge(X, y_c, lam, n_factor=True):
     alpha = lam * (1.0/n if n_factor else 1.0) # α = λ/n or α = λ
     XT_X = X.T @ X # X^T X
     XT_y = X.T @ y_c # X^T y_c
-    return np.linalg.solve(XT_X + alpha * np.eye(p), XT_y) # θ_ridge
+    return np.linalg.solve(XT_X + alpha * np.eye(p), XT_y) # θ_ridge """
 
-def fit_ols_sklearn(X, y):
+""" def fit_ols_sklearn(X, y):
     ""OLS via scikit-learn (normal equations / least squares).""
     model = LinearRegression(fit_intercept=True, copy_X=True)
     model.fit(X, y)
@@ -104,19 +104,19 @@ def fit_ridge_sklearn(X, y, lam, n_factor=False, n=None, random_state=42):
     alpha = (lam / n) if (n_factor and n is not None) else lam
     model = Ridge(alpha=alpha, fit_intercept=True, random_state=random_state)
     model.fit(X, y)
-    return model  # use model.predict(Xnew)
+    return model  # use model.predict(Xnew) """
 
-"Prediction functions."
+""" "Prediction functions."
 #Difference is shape between the two below
 def predict_centered(X, theta, y_mean):   
     return X @ theta + y_mean # add back y_mean
 
 #1D 
 def predict_from_theta(X, theta, y_mean):
-    return (X @ theta).ravel() + y_mean # add back y_mean
+    return (X @ theta).ravel() + y_mean # add back y_mean """
 
 "Sweep functions to evaluate models over hyperparameter ranges."
-def sweep_degree(X_full, y, split_func, deg_max=15):
+""" def sweep_degree(X_full, y, split_func, deg_max=15):
     X_tr_s, X_te_s, y_tr_c, y_te, _, y_mean = split_func(X_full, y) # split and scale
     degrees = range(1, deg_max + 1) # degrees to try
     mses, r2s, norms = [], [], [] # store metrics
@@ -141,4 +141,3 @@ def sweep_ridge(X_full, y, split_func, degree, lambdas, n_factor=True):
         r2s.append(r2(y_te, yhat)) # compute metrics
         norms.append(float(np.linalg.norm(theta))) # L2 norm of theta
     return np.asarray(mses), np.asarray(r2s), np.asarray(norms)  """
-

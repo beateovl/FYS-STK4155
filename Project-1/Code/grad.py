@@ -10,11 +10,14 @@ def grad_ols(X, y, theta):
     r = X @ theta - y # residuals
     return (X.T @ r) / X.shape[0] # 1/2n factor cancels with 2 from derivative
 
-def grad_ridge(X, y, theta, lam): 
-    """Ridge gradient, 1/2n. lam = λ."""
-    return grad_ols(X, y, theta) + lam * theta  # 1/2n factor cancels with 2 from derivative
+def grad_ridge(X, y, theta, lam, n_factor=True): 
+    """Ridge gradient, 1/2n. lam = λ.
+    If n_factor=True, interpret lam as λ and use α = λ/n to match closed-form.
+    """
+    alpha = (lam / X.shape[0]) if n_factor else lam
+    return grad_ols(X, y, theta) + alpha * theta  # 1/2n factor cancels with 2 from derivative
 
-def gd(X, y, eta, iters, theta0=None, lam=None):
+def gd(X, y, eta, iters, theta0=None, lam=None, n_factor=True):
     """
     Plain gradient descent.
     - lam=None  → OLS
@@ -22,9 +25,28 @@ def gd(X, y, eta, iters, theta0=None, lam=None):
     Returns θ:(p,)
     eta: learning rate
     """
-    p = X.shape[1] # n features
-    theta = np.zeros(p, dtype=float) if theta0 is None else np.asarray(theta0, float).ravel() # ensure 1D
-    for _ in range(iters): 
-        g = grad_ols(X, y, theta) if lam is None else grad_ridge(X, y, theta, lam) # gradient 
-        theta -= eta * g # gradient step
-    return theta 
+    p = X.shape[1]
+    theta = np.zeros(p, dtype=float) if theta0 is None else np.asarray(theta0, float).ravel()
+    for _ in range(iters):
+        if lam is None:
+            g = grad_ols(X, y, theta)
+        else:
+            g = grad_ridge(X, y, theta, lam, n_factor=n_factor)
+        theta -= eta * g
+    return theta
+
+def compute_alpha(lam, n, n_factor):
+    """Helper to get α from λ, consistent with grad_ridge."""
+    return (lam / n) if (n_factor and lam is not None) else (lam or 0.0)
+
+def loss_ols(X, y, theta):
+    """OLS loss, 1/2n."""
+    r = X @ theta - y
+    return 0.5 * (r @ r) / X.shape[0]
+
+def loss_ridge(X, y, theta, lam, n_factor=True):
+    """Ridge loss, 1/2n. lam = λ."""
+    n = X.shape[0]
+    alpha = _alpha_from_lambda(lam, n, n_factor)
+    r = X @ theta - y
+    return 0.5 * (r @ r) / n + 0.5 * alpha * (theta @ theta)

@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 
-"Our synthetic dataset functions."
+"Synthetic dataset functions for the Runge regression experiments."
 
 def make_data(n=300, noise_sd=0.3, seed=42): # Runge function + noise
     rng = np.random.default_rng(seed) 
