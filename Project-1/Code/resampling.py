@@ -9,7 +9,8 @@ def bootstrap_predictions(fit_fn, pred_fn, Xtr_s, ytr_c, Xte_s, y_mean, B=300, s
     """Return P (B, n_test) of bootstrap predictions on a fixed test set."""
     rng = np.random.default_rng(seed)
     n = Xtr_s.shape[0]
-    idxs = rng.integers(0, n, size=(B, n))
+    idxs = rng.integers(0, n, size=(B, n)) 
+    # Each row of idxs is a bootstrap sample of indices into (Xtr_s, ytr_c).
     return np.vstack([
         pred_fn(Xte_s, fit_fn(Xtr_s[idx], ytr_c[idx]), y_mean).ravel()
         for idx in idxs
@@ -26,10 +27,13 @@ def bias_variance_from_preds(P, y_true):
 
 
 def kfold_cv(X_full, y, degree, k, fit_fn, pred_fn, splitter=None):
-    """k-fold CV MSE for a fixed degree. Scaling/centering done per fold."""
-    splitter = splitter or KFold(n_splits=k, shuffle=True, random_state=42)
+    """k-fold CV MSE for a fixed degree. Scaling/centering done per fold. 
+    """
+    # Create a KFold splitter if none given
+    splitter = splitter or KFold(n_splits=k, shuffle=True, random_state=42) 
     mses = []
-    for tr, te in splitter.split(X_full):
+    # Loop over each train/test split
+    for tr, te in splitter.split(X_full): 
         Xtr, Xte = X_full[tr], X_full[te]
         ytr, yte = y[tr], y[te]
 
@@ -46,5 +50,5 @@ def kfold_cv(X_full, y, degree, k, fit_fn, pred_fn, splitter=None):
         yhat = pred_fn(Xte_p, theta, y_mean)
 
         mses.append(float(((yte - yhat) ** 2).mean()))
-    return float(np.mean(mses))
+    return float(np.mean(mses)) # average MSE over folds
 

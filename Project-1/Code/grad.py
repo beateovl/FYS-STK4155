@@ -35,18 +35,18 @@ def gd(X, y, eta, iters, theta0=None, lam=None, n_factor=True):
         theta -= eta * g
     return theta
 
-def compute_alpha(lam, n, n_factor):
-    """Helper to get α from λ, consistent with grad_ridge."""
-    return (lam / n) if (n_factor and lam is not None) else (lam or 0.0)
+"Loss functions for tracing."
 
-def loss_ols(X, y, theta):
-    """OLS loss, 1/2n."""
-    r = X @ theta - y
+def loss_ols(X, y_c, theta):
+    r = X @ theta - y_c 
     return 0.5 * (r @ r) / X.shape[0]
 
-def loss_ridge(X, y, theta, lam, n_factor=True):
-    """Ridge loss, 1/2n. lam = λ."""
+def loss_ridge(X, y_c, theta, lam, n_factor=True):
     n = X.shape[0]
-    alpha = _alpha_from_lambda(lam, n, n_factor)
-    r = X @ theta - y
-    return 0.5 * (r @ r) / n + 0.5 * alpha * (theta @ theta)
+    alpha = (lam / n) if n_factor else lam
+    r = X @ theta - y_c
+    return 0.5 * (r @ r) / n + 0.5 * alpha * (theta @ theta) 
+
+def alpha_from_lambda(lam, n, n_factor=True):
+    # Ridge convention: α = λ/n if n_factor=True, else α = λ
+    return (lam / n) if n_factor else lam

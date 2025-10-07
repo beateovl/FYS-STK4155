@@ -38,7 +38,7 @@ def fit_lasso(X, y_c, lam, seed=42, max_iter=20000):
     model.fit(X, y_c)
     return model.coef_.ravel()
 
-# ---------------- Sweeps that your notebooks call (unchanged signatures) ------------
+# ---------------- Sweeps (unchanged signatures) ------------
 def sweep_degree(X_full, y, split_func, deg_max):
     """
     OLS vs polynomial degree (hold-out split inside split_func).
