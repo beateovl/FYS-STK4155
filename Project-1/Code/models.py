@@ -9,32 +9,41 @@ def predict_centered(X, theta, y_mean):
 # ---------------- OLS via scikit-learn (no intercept; y is centered) ----------------
 def fit_ols(X, y_c):
     """
-    OLS with scikit-learn. We already centered y on train and scaled X,
-    so we fit with no intercept and return theta (coef vector) to keep
-    the same interface as before.
+    OLS with scikit-learn. 
     """
     model = LinearRegression(fit_intercept=False, copy_X=True)
     model.fit(X, y_c)
     return model.coef_.ravel()
 
-# ---------------- Ridge via scikit-learn (no intercept; y is centered) --------------
-def fit_ridge(X, y_c, lam, n_factor=True, seed=42):
+# ---------------- Ridge own code and via scikit-learn (no intercept; y is centered) --------------
+def fit_ridge(X, y_c, lam):
     """
-    Ridge with scikit-learn. Keep your α = λ/n option when n_factor=True.
-    Return theta to preserve your old predict_centered() usage.
+    Minimizes: (1/(2n))||Xθ - y_c||^2 + (α/2)||θ||^2 with α = λ/n.
+    Matching normal equations: (X^T X + λ I) θ = X^T y_c.
     """
-    n, p = X.shape
-    alpha = (lam / n) if n_factor else lam
-    model = Ridge(alpha=alpha, fit_intercept=False, seed=seed)
-    model.fit(X, y_c)
-    return model.coef_.ravel()
+    XT_X = X.T @ X
+    XT_y = X.T @ y_c
+    p = X.shape[1]
+    return np.linalg.solve(XT_X + lam * np.eye(p), XT_y)
+
+def fit_ridge_sklearn(X, y, lam, n_factor=False, n=None, random_state=42):
+    """Ridge via scikit-learn. Note: sklearn uses alpha directly (no /n)."""
+    alpha = (lam / n) if (n_factor and n is not None) else lam
+    model = Ridge(alpha=alpha, fit_intercept=True, random_state=random_state)
+    model.fit(X, y)
+    return model  # use model.predict(Xnew)
 
 # ---------------- Lasso via scikit-learn (no intercept; y is centered) --------------
-def fit_lasso(X, y_c, lam, seed=42, max_iter=20000):
-    """
-    Lasso with scikit-learn's coordinate descent (what your teacher wants).
-    """
-    model = Lasso(alpha=lam, fit_intercept=False, seed=seed, max_iter=max_iter)
+
+def fit_lasso_skl(X, y_c, lam, max_iter=20000, tol=1e-6, selection="cyclic"):
+    # Our loss: (1/n)||r||^2 + lam * ||theta||_1
+    # sklearn loss: (1/(2n))||r||^2 + alpha * ||theta||_1
+    alpha = lam / 2.0
+    model = Lasso(alpha=alpha,
+                  fit_intercept=False,
+                  max_iter=max_iter,
+                  tol=tol,
+                  selection=selection)
     model.fit(X, y_c)
     return model.coef_.ravel()
 
@@ -65,7 +74,7 @@ def sweep_ridge(X_full, y, split_func, degree, lambdas, n_factor=True):
     Xtr, Xte = X_tr_s[:, :degree], X_te_s[:, :degree]
     mses, r2s, norms = [], [], []
     for lam in np.asarray(lambdas):
-        theta = fit_ridge(Xtr, y_tr_c, lam, n_factor=n_factor)
+        theta = fit_ridge(Xtr, y_tr_c, lam)
         yhat = predict_centered(Xte, theta, y_mean)
         mses.append(mse(y_te, yhat))
         r2s.append(r2(y_te, yhat))
@@ -77,21 +86,7 @@ def sweep_ridge(X_full, y, split_func, degree, lambdas, n_factor=True):
 
 #OLD
 
-""" """ "OLS with closed-form solution (normal equations)."
-def fit_ols(X, y_c):
-    # Closed-form OLS (no intercept; y is centered)
-    XT_X = X.T @ X # X^T X
-    XT_y = X.T @ y_c # X^T y_c
-    return np.linalg.solve(XT_X, XT_y) # θ = (X^T X)^{-1} X^T y_c
 
-"Ridge regression with closed-form solution."
-def fit_ridge(X, y_c, lam, n_factor=True):
-    # Ridge: (X^T X + αI)^{-1} X^T y_c
-    n, p = X.shape  # n samples, p features
-    alpha = lam * (1.0/n if n_factor else 1.0) # α = λ/n or α = λ
-    XT_X = X.T @ X # X^T X
-    XT_y = X.T @ y_c # X^T y_c
-    return np.linalg.solve(XT_X + alpha * np.eye(p), XT_y) # θ_ridge """
 
 """ def fit_ols_sklearn(X, y):
     ""OLS via scikit-learn (normal equations / least squares).""
