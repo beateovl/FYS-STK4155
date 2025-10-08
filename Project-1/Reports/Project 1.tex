@@ -144,9 +144,15 @@ Plain GD iteratively updates the parameters $\theta$ by taking a step proportion
 \theta_{k+1} \;=\; \theta_k \;-\; \eta \,\nabla_{\theta} C(\theta_k)
 \end{equation}
 
-Simply put, the step size is the same for every parameter. \\ 
+Simply put, the step size is the same for every parameter. In ML models the full gradient $\nabla_{\theta} C(\theta)$ must be computed by summing over all datapoints in a dataset. Calculating this full gradient is computationally expensive when the datasets become large. \\ 
 
-\textit{4.3 Stochastic gradient descent (SGD) } \\
+\textit{4.3 Stochastic gradient descent (SGD)} \\
+
+With stochastic gradient descent the cost function $C(\theta)$ can be expressed as a sum over the individual losses $c_i(x_i,\theta)$ for N data points:
+
+\begin{equation}
+    C(\theta) = \frac{1}{N}\sum_{i=1}^{N} c_i(x_i,\theta)
+\end{equation}
 
 SGD introduces randomness and computational efficiency by approximating the full gradient $\nabla_{\theta} C(\theta)$ by summing over a subset of the data $B_k$: 
 
@@ -259,7 +265,7 @@ To make our model behave better with high-degree polynomials, we implement the $
 
 \subsubsection{Adding Ridge regression for the Runge function}
 
-Data and polynomial features are produced by the same utilities explained in Section \ref{subsec:ols}. In \texttt{def fit\_ridge(X, y\_c, lam, n\_factor=True)} we add the $L_2$ term to the $X^TX$ term from OLS so this becomes $X^TX + \lambda I$ which reduce variance at the cost of small bias, but improving on MSE. 
+Data and polynomial features are produced by the same utilities explained in Section \ref{subsec:ols}, still using Runge as the target function. In \texttt{def fit\_ridge(X, y\_c, lam, n\_factor=True)} we add the $L_2$ term to the $X^TX$ term from OLS so this becomes $X^TX + \lambda I$ which reduce variance at the cost of small bias, but improving on MSE. We expect that the coefficients will shrink with the $L_2$ penalty. 
 
 \subsection{Use of AI tools}
 	
