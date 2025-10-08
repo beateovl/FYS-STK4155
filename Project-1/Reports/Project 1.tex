@@ -269,17 +269,28 @@ Data and polynomial features are produced by the same utilities explained in Sec
 
 \subsection{Use of AI tools}
 	
-I used ChatGPT to help me make a plan for how to structure the code for this project. Before that, I started with part (a), wrote the code, then went to part (b) and realized I could reuse some code from part (a). I ended up with messy code without clear structure, with repeated variables and functions more times than needed. I wanted to separate the code and make it reusable for all parts of this project, and also for other projects/exercises later. So I uploaded the project description to ChatGPT and asked for a plan on how to organize the code (not the actual code). ChatGPT gave me a plan where I can make one Python file at a time (data, models, plotting, etc.), so I don’t have to think only in terms of part a, b, c, which was a bit overwhelming. This helps me keep the code cleaner and easier to reuse.
+I used ChatGPT to help me make a plan for how to structure the code for this project. Before that, I started with part (a), wrote the code, then went to part (b) and realized I could reuse some code from part (a). I ended up with messy code without clear structure, with repeated variables and functions more times than needed. I wanted to separate the code and make it reusable for all parts of this project, and also for other projects/exercises later. So I uploaded the project description to ChatGPT and asked for a plan on how to organize the code (not the actual code). ChatGPT gave me a plan where I can make one Python file at a time (data, models, plotting, etc.), so I don’t have to think only in terms of part a, b, c, which was a bit overwhelming. This helps me keep the code cleaner and easier to reuse. \\
 	
 \section{Results and Discussion}\label{section:results} 
 
 \subsection{Ordinary Least Square (OLS) for the Runge function}
 
-\begin{figure}[h]
+For the Ordinary Least Squares (OLS) method we see exactly what we expected. In figure \ref{fig:ols_vs_degree} we see how each 
+
+\begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{Project-1/Figures/runge_ols_mse_r2_vs_degree.png}
-    \caption{Test MSE vs polynomial degree. }
+    \caption{Test MSE vs polynomial degree, for different noise values.}
     \label{fig:ols_vs_degree}
+\end{figure}
+
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{Project-1/Figures/runge_ols_theta_norms_vs_degree.png}
+    \caption{The figure shows how the coefficients blow up as the complexity increases.}
+    \label{fig:biasvariance}
 \end{figure}
 
 \subsection{}
@@ -287,7 +298,7 @@ I used ChatGPT to help me make a plan for how to structure the code for this pro
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=1\linewidth]{Project-1/Figures/bias_variance_tradeoff.png}
+    \includegraphics[width=1\linewidth]{Project-1/Figures/runge_ols_theta_norms_vs_degree.png}
     \caption{Bias–variance trade-off for polynomial regression on a noisy 1D function. For each polynomial degree on the x-axis, we see the corresponding MSE, squared bias and variance. As model complexity increases, squared bias decreases and variance increases. MSE is smallest around degree 10, in the intermediate window, showing how simpler models underfit (high bias) and complex models overfit (high variance).}
     \label{fig:biasvariance}
 \end{figure}
