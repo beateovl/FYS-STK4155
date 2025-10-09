@@ -1,4 +1,4 @@
-\documentclass[amssymb,twocolumn,aps]{revtex4}
+\documentclass[amssymb,twocolumn,aps]{revtex4-2}
 
 % allows special characters (including æøå)
 \usepackage[utf8]{inputenc}
@@ -10,7 +10,8 @@
 \usepackage[table]{xcolor}
 \usepackage{xcolor}           % set colors
 \usepackage{hyperref}         % automagic cross-referencing 
-\usepackage{float}			  % force placement of tables and figures
+\usepackage{float}	 % force placement of tables and figures
+
 
 
 \begin{document}
@@ -219,15 +220,15 @@ A complex model (high flexibility) has low bias and high variance, adapting too 
 
 \subsubsection{Generalization error estimators}
 
-\subsubsubsection{Hold out}
+{Hold out}
 
 Split the data randomly into training and test data sets. For each model complexity (polynomial degree or regularization factor $\lambda$) we first fit on train, then compute test and train MSE. As complexity increases, train MSE usually decreases, while test MSE will have a characteristic U-shape: high error from underfitting at low complexity, a good fit in the middle and overfitting at high complexity. This helps us choose the complexity that minimizes test MSE. Understanding the relationship between test errors, train errors and model complexity is fundamental to understanding the bias-variance trade-off. 
 
-\subsubsubsection{Bootstrap}
+{Bootstrap}
 
 We use our training dataset and re-draw samples from it (with replacement), several times. We then fit our model to the new datasets, to see how predictions change. For each test point we compute average prediction, variance, MSE, and squared bias. This tells us if our model is stable (low variance) or touchy (high variance) as we nudge the data. 
 
-\subsubsubsection{K-fold Cross-Validation (CV)}
+{K-fold Cross-Validation (CV)}
 
 K-fold CV is a resampling technique designed to avoid issues where random splitting might lead to an unbalanced influence of certain samples on model building or evaluation. We split the data into K equal parts (or folds). For each setting (degree or regularization parameter) we train on K-1 fold, and evaluate on the left-out fold. We repeat this so every fold is the test set once. Average over the K-errors to get CV-MSE. This way we train and split more than just once, which helps if data is sparse. Using CV-MSE we can pick the best complexity and retrain with the chosen complexity.  
 
@@ -327,26 +328,64 @@ In figure \ref{fig:ridge_mse_lambda} as the penalty term $\lambda$ increases fro
 
 \subsubsection{Gradient descent (plain/full batch)}
 
-From figure \ref{fig:gd_earlystop} we see that for OLS the larger $\eta$ speeds up early progress, but eventually they all approach similar loss, plateauing around 22000 iterations. For Ridge, we see the same thing, but compared to OLS fewer iterations are needed to reach the same loss, about 6800 iterations. We calculate the MSE/$R^2$ of the two GD approaches and compare to closed-form MSE/$R^2$. 
+\ref{tab:test-ols-ridge} shows the MSE and $R^2$ evaluations from GD with a fixed learning rate compared to our closed-form methods. Overall Ridge (CF) had the best performance metrics. For OLS specifically, GD performed better, but for Ridge CF had better metrics. 
 
-\begin{itemize}
-    \item \textbf{CF OLS}\,\, \,\, \,\,\,\,  MSE= 0.1351, $R^2$ = 0.3215
-    \item \textbf{GD OLS} \,\,\,\,\,\,\,\,\,   MSE= 0.1304, $R^2$ = 0.3454
-    \item \textbf{CF RIDGE} \,\,  MSE= 0.1263, $R^2$ = 0.3661
-    \item \textbf{GD RIDGE} \,\,  MSE= 0.1325, $R^2$ = 0.3347
-\end{itemize}
+\begin{table}[h!]  % [t] or [h!] as you prefer
+\caption{Test performance for OLS and Ridge (CF = closed form, GD = gradient descent).}
+\label{tab:test-ols-ridge}
+\begin{ruledtabular}
+\begin{tabular}{llcc} % no spaces here
+Model & Solver & MSE & $R^2$ \\
+\colrule
+OLS   & CF & 0.135149 & 0.321477 \\
+OLS   & GD & 0.131579 & 0.339400 \\
+Ridge & CF & 0.126253 & 0.366140 \\
+Ridge & GD & 0.132170 & 0.336433 \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
 
-We also calculate the final train loss for Ridge using CF and GD:\\ 
+Table \ref{tab:train-ols-ridge} shows the printed training loss we calculated from our GD and CF methods. The difference between them should ideally be $\approx$ 0 for each model, here both methods have a difference in their training loss. 
 
-\textbf{TRAIN LOSS}   CF= 0.0425, GD = 0.0461
+\begin{table}[h!]
+\caption{Training loss for OLS and Ridge (CF = closed form, GD = gradient descent).}
+\label{tab:train-ols-ridge}
+\begin{ruledtabular}
+\begin{tabular}{lcc}
+Model & Loss (CF) & Loss (GD) \\
+\colrule
+Ridge & 0.042513 & 0.045991 \\
+OLS   & 0.040149 & 0.045871 \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
 
+\subsubsection{Optimizers}
+
+\begin{table}[h!]
+\caption{Test metrics by optimizer for OLS and Ridge.}
+\label{tab:test-metrics-optimizers}
+\begin{ruledtabular}
+\begin{tabular}{lcccc}
+Optimizer & \multicolumn{2}{c}{OLS} & \multicolumn{2}{c}{Ridge} \\
+\colrule
+ & MSE & $R^2$ & MSE & $R^2$ \\
+\colrule
+gd       & 0.132044 & 0.3371 & 0.131033 & 0.3421 \\
+momentum & 0.132044 & 0.3371 & 0.131375 & 0.3404 \\
+adagrad  & 0.137117 & 0.3116 & 0.137484 & 0.3098 \\
+rmsprop  & 0.130348 & 0.3456 & 0.131679 & 0.3389 \\
+adam     & 0.128056 & 0.3571 & 0.130480 & 0.3449 \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\linewidth]{Project-1/Figures/gd_earlystop_ols_ridge.png}
-    \caption{The figure shows loss convergence curves for GD approach to OLS and Ridge for different $\eta$ steps.}
-    \label{fig:gd_earlystop}
+    \includegraphics[width=1\linewidth]{Project-1/Figures/.png}
+    \caption{}
+    \label{fig:}
 \end{figure}
 
 \subsection{Discussion}
@@ -357,7 +396,11 @@ In figure \ref{fig:norms_vs_degree} we see the ill-conditioning of high-complexi
 
 Ridge with its penalty term trades variance for bias. At small $\lambda$ we have low bias and higher variance, and this is where the model performs best on this split with p = 15. As we increase the penalty term, the coefficients are strongly shrunk and variance falls, but bias grows so test MSE and $R^2$ worsens. The curve for test MSE in \ref{fig:ridge_mse_lambda} is mostly monotone after its minimum at $10^{-4}-10^{-5}$, further shrinking the coefficients after this will add bias. \\
 
-Next we replaced the analytical solution that we used for the closed-form OLS and Ridge, with a plain gradient descent with a fixed learning rate. We still used the same data, with the same noise, same polynomial degree p = 15 and the same penalty term we found worked well for the Ridge method earlier. For Ridge in GD form we still use the $\alpha$-form, as in $\alpha=\frac{\lambda}{n}$. In figure \ref{fig:} we have swept over several $\eta$ values and plotted the training loss vs iterations. For OLS, the curves descend slowly, and for Ridge they descend faster, both flattening eventually. We also printed the train loss for CF and GD; we see they don't match (as they should, meaning that GD has converged completely). We might need millions of steps to make GD converge, as GD is slow on ill-conditioned problems like high-degree Runge polynomials. Fixed step GD contracts the error p slowly, even with a well chosen $\eta$. Increasing $\lambda$ improves conditioning and speeds the convergence (with $\lambda$ = 30, we reach a plateau at many less iterations). Decreasing the tolerance or increasing the iterations also help narrowing the gap between CF and GD train loss. \\
+Next we replaced the analytical solution that we used for the closed-form OLS and Ridge, with a plain gradient descent with a fixed learning rate. We still used the same data, with the same noise, same polynomial degree p = 15 and the same penalty term we found worked well for the Ridge method earlier. For Ridge in GD form we still use the $\alpha$-form, as in $\alpha=\frac{\lambda}{n}$. 
+
+In table \ref{tab:test-ols-ridge} the results from GD are compared to the CF metrics. For OLS we see that GD attains a slightly lower MSE score than CF despite a higher training loss, as seen in table \ref{tab:train-ols-ridge}, meaning we most likely stopped the GD before reaching full convergence. On Ridge, the CF solution performs best. Since Ridge already shrinks the coefficients with the chosen $\lambda$, we get extra under-fitting with GD. We see that if $\eta$ is too small, GD converges slowly and can stop far from the optimum. If $\eta$ is too large, GD can oscillate or diverge. We also printed the train loss for CF and GD; we see they don't match (as they should, meaning that GD has converged completely).
+
+Our results show that our chosen $\eta$ and iteration number gave us only partial convergence. For OLS it acted helpfully, but for Ridge we need a tuned $\eta$ or iteration number to close the gap between Gd and CF training loss. We might need millions of steps to make GD converge, as GD is slow on ill-conditioned problems like high-degree Runge polynomials. Increasing $\lambda$ also speeds up the convergence. 
 
 
 
