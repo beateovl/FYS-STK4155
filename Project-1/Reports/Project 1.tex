@@ -259,7 +259,7 @@ To give the model the flexibility to capture the shape of the curve, we expand e
 \subsubsection{Ordinary Least Square (OLS) for the Runge function}
 \label{subsec:ols}
 
-We start with the simplest closed-form model; OLS. The OLS find a set of coefficients that matches the model's predictions as close as possible to the observed targets. In our implementation (\texttt{ fit\_ols}) we use the data set generated and preprocessing techniques described in Section \ref{subsec:data}, and solve the normal equations directly. The output from this are the parameters $\theta$. We calculate MSE and $R^2$ to evaluate the model's fit over the different polynomial degrees. We expect that the method will perform more poorly when increasing the polynomial degree. We also plot how the noise affects MSE and $R^2$. We expect a noise free model to work much better at higher polynomials than if we implement noise. We plot a noise-free, minor noise and heavy noise scenario with MSE vs $R^2$ to see the effect. For the MSE we expect a U-shaped curve where the intermediate polynomial degrees are the best fit, and for the $R^2$ we expect the same effect, with an upside down U-shaped curve, where the low degrees and higher degrees are bad fits. We will also plot the parameters $\theta$ vs polynomial degree. We expect the parameter size to blow up as the degree increases. FIX \\
+We start with the simplest closed-form model; OLS. The OLS find a set of coefficients that matches the model's predictions as close as possible to the observed targets. In our implementation (\texttt{ fit\_ols}) we use the data set generated and preprocessing techniques described in Section \ref{subsec:data}, and solve the normal equations directly. The output from this are the parameters $\theta$. We calculate MSE and $R^2$ to evaluate the model's fit over the different polynomial degrees. We expect that the method will perform more poorly when increasing the polynomial degree. We also plot how the noise affects MSE and $R^2$. We expect a noise free model to work much better at higher polynomials than if we implement noise. We plot a noise-free and heavy noise scenario with MSE vs $R^2$ to see the effect. For the MSE we expect a U-shaped curve where the intermediate polynomial degrees are the best fit, and for the $R^2$ we expect the same effect, with an upside down U-shaped curve, where the low degrees and higher degrees are bad fits. We will also plot the parameters $\theta$ vs polynomial degree. We expect the parameter size to blow up as the degree increases. FIX \\
 
 To make our model behave better with high-degree polynomials, we implement the $L_2$ norm penalty, Ridge regularization. \\
 
@@ -273,9 +273,23 @@ I used ChatGPT to help me make a plan for how to structure the code for this pro
 	
 \section{Results and Discussion}\label{section:results} 
 
-\subsection{Ordinary Least Square (OLS) for the Runge function}
+\subsection{Results}
 
-For the Ordinary Least Squares (OLS) method we see exactly what we expected. In figure \ref{fig:ols_vs_degree} we see how each 
+\paragraph{Setup:}
+Data from the Runge function
+\[
+f(x)=\frac{1}{1+25x^{2}}, \qquad x\in[-1,1],
+\]
+with additive Gaussian noise \(\varepsilon\sim\mathcal N(0,\sigma^{2})\).
+For $\sigma = 0.3$  we construct polynomial features up to
+degree \(p\le 15\), use a single train/test split, apply standardization
+on the training data only, fit closed-form OLS on the centered target
+\(y_{\text{train}}-\bar y_{\text{train}}\), and shift predictions back to the
+original scale by adding \(\bar y_{\text{train}}\).
+
+\subsubsection{Simplest CF method: Ordinary Least Square (OLS)}
+
+We tested two different noise scenarios;  a noiseless dataset and a high noise dataset. For the noiseless scenario test MSE decreases monotonically with degree p, and approaches $\sim 0$. $R^2$ rises toward $\sim 1$. 
 
 \begin{figure}[H]
     \centering
@@ -284,16 +298,22 @@ For the Ordinary Least Squares (OLS) method we see exactly what we expected. In 
     \label{fig:ols_vs_degree}
 \end{figure}
 
-
-
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{Project-1/Figures/runge_ols_theta_norms_vs_degree.png}
-    \caption{The figure shows how the coefficients blow up as the complexity increases.}
-    \label{fig:biasvariance}
+    \caption{The figure shows the relationship between the $l_2$ norm of the OLS coefficients and the polynomial degree p.}
+    \label{fig:norms_vs_degree}
 \end{figure}
 
-\subsection{}
+
+
+\subsubsection{Introducing the penalty term}
+
+\subsection{Discussion}
+
+For the closed-form Ordinary Least Squares (OLS) method we see what we expected. In figure \ref{fig:ols_vs_degree} we see that a noiseless prediction function behaves well at higher polynomial degrees. MSE decreases towards 0 and $R^2$ increases towards 1. This is a pure bias regime, with noiseless data higher-degree polynomials approximate the Runge curve better. But for the model with heavy noise we see the more characteristic U-shape we predicted in the method section, meaning that our model gives the best predictions at medium complexity and becomes unstable at higher and lower degrees.
+
+In figure \ref{fig:norms_vs_degree} we see that the $l_2$ norms are stable at low to medium degrees, then explode rapidly beyond p = 11-13. This reflects the ill-conditioning of high-complexity design matrices using the OLS method. Large coefficients are a classic overfitting sign, which is why we move forward to testing the Ridge method with its penalty term. 
 
 
 \begin{figure}[h]
