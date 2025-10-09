@@ -307,35 +307,61 @@ In figure \ref{fig:norms_vs_degree} and beyond, we have settled on a noise level
     \label{fig:norms_vs_degree}
 \end{figure}
 
-\subsubsection{Introducing the penalty term}
+\subsubsection{Introducing the penalty term $\lambda$, CF Ridge regression}
 
+In figure \ref{fig:ridge_mse_lambda} as the penalty term $\lambda$ increases from very small values, test MSE is smallest at around $\lambda \approx 10^{-4}-10^{-5}$ and then increases steadily from there. $R^2$ has its peak at the same region ($10^{-4}-10^{-5}$) and steadily decreases from there. In figure \ref{fig:ridge_theta_norms} the coefficient norm shrinks steadily as $\lambda$ increases. Shrinkage is most effective at $10^{-6}-10^{-3}$ then flattens out. 
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{Project-1/Figures/runge_ridge_mse_r2_vs_lambda.png}
+    \caption{Test MSE and $R^2$ plotted against different $\lambda$ values.}
+    \label{fig:ridge_mse_lambda}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{Project-1/Figures/ridge_theta_norms_vs_lambda.png}
+    \caption{The figure shows the relationshp between the $l_2$ norm of the Ridge coefficients and $\lambda$. }
+    \label{fig:ridge_theta_norms}
+\end{figure}
+
+\subsubsection{Gradient descent (plain/full batch)}
+
+begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{Project-1/Figures/.png}
+    \caption{}
+    \label{fig:}
+\end{figure}
 
 \subsection{Discussion}
 
 For the closed-form Ordinary Least Squares (OLS) method, these two curves reproduce the expected bias-variance trade-off. Increasing p reduces bias, but beyond a point the variance dominates, so test error stops improving and gets worse. In figure \ref{fig:ols_vs_degree} we see that a noiseless prediction function behaves well at higher polynomial degrees. This is a pure bias regime, with noiseless data higher-degree polynomials approximate the Runge curve better. But for the model with heavy noise we see the more characteristic U-shape we predicted in the method section, meaning that our model gives the best predictions at medium complexity and becomes unstable at higher and lower degrees.
 
-In figure \ref{fig:norms_vs_degree} we see the ill-conditioning of high-complexity design matrices using the OLS method. Large coefficients are a classic overfitting sign, which is why we move forward to testing the Ridge method with its penalty term. 
+In figure \ref{fig:norms_vs_degree} we see the ill-conditioning of high-complexity design matrices using the OLS method. Large coefficients are a classic overfitting sign, which is why we move forward to testing the Ridge method with its penalty term. \\
 
+Ridge with its penalty term trades variance for bias. At small $\lambda$ we have low bias and higher variance, and this is where the model performs best on this split with p = 15. As we increase the penalty term, the coefficients are strongly shrunk and variance falls, but bias grows so test MSE and $R^2$ worsens. The curve for test MSE in \ref{fig:ridge_mse_lambda} is mostly monotone after its minimum at $10^{-4}-10^{-5}$, further shrinking the coefficients after this will add bias. 
 
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=1\linewidth]{Project-1/Figures/runge_ols_theta_norms_vs_degree.png}
-    \caption{Bias–variance trade-off for polynomial regression on a noisy 1D function. For each polynomial degree on the x-axis, we see the corresponding MSE, squared bias and variance. As model complexity increases, squared bias decreases and variance increases. MSE is smallest around degree 10, in the intermediate window, showing how simpler models underfit (high bias) and complex models overfit (high variance).}
-    \label{fig:biasvariance}
+    \includegraphics[width=1\linewidth]{Project-1/Figures/.png}
+    \caption{}
+    \label{fig:}
 \end{figure}
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=1\linewidth]{Project-1/Figures/heatmap.png}
-    \caption{Test mean-squared error (MSE) for Ridge regression as we change the polynomial degree as a function of regularization strength $\lambda$.Each cell show the MSE for one degree and one value of $\lambda$. Lighter color represents higher MSE and higher error. We see that higher degree models fit the data better, with a smaller $\lambda$. }
-    \label{fig:heatmap}
-\end{figure}
+
 
 
 \section{Conclusion}\label{section:conclusion} 
 
-For low-noise cases and low to medium complexity, OLS works best. 
+For low-noise cases and low to medium complexity, OLS works best. When introducing Ridge, we see a useful operating range of around $10^{-4}$ for this exact data, split and degree, where Ridge matches OLS but keeps coefficients smaller. However, too little shrinkage gives too large coefficients, and too much shrinkage underfits (high MSE and low $R^2$). Overall, Ridge stabilizes the degree 15 polynomial and offers a controllable bias-variance trade-off. 
+
+begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{Project-1/Figures/.png}
+    \caption{}
+    \label{fig:}
+\end{figure}
 
 \bibliography{biblio}
 
