@@ -327,11 +327,26 @@ In figure \ref{fig:ridge_mse_lambda} as the penalty term $\lambda$ increases fro
 
 \subsubsection{Gradient descent (plain/full batch)}
 
-begin{figure}[H]
+From figure \ref{fig:gd_earlystop} we see that for OLS the larger $\eta$ speeds up early progress, but eventually they all approach similar loss, plateauing around 22000 iterations. For Ridge, we see the same thing, but compared to OLS fewer iterations are needed to reach the same loss, about 6800 iterations. We calculate the MSE/$R^2$ of the two GD approaches and compare to closed-form MSE/$R^2$. 
+
+\begin{itemize}
+    \item \textbf{CF OLS}\,\, \,\, \,\,\,\,  MSE= 0.1351, $R^2$ = 0.3215
+    \item \textbf{GD OLS} \,\,\,\,\,\,\,\,\,   MSE= 0.1304, $R^2$ = 0.3454
+    \item \textbf{CF RIDGE} \,\,  MSE= 0.1263, $R^2$ = 0.3661
+    \item \textbf{GD RIDGE} \,\,  MSE= 0.1325, $R^2$ = 0.3347
+\end{itemize}
+
+We also calculate the final train loss for Ridge using CF and GD:\\ 
+
+\textbf{TRAIN LOSS}   CF= 0.0425, GD = 0.0461
+
+
+
+\begin{figure}[H]
     \centering
-    \includegraphics[width=1\linewidth]{Project-1/Figures/.png}
-    \caption{}
-    \label{fig:}
+    \includegraphics[width=1\linewidth]{Project-1/Figures/gd_earlystop_ols_ridge.png}
+    \caption{The figure shows loss convergence curves for GD approach to OLS and Ridge for different $\eta$ steps.}
+    \label{fig:gd_earlystop}
 \end{figure}
 
 \subsection{Discussion}
@@ -340,7 +355,11 @@ For the closed-form Ordinary Least Squares (OLS) method, these two curves reprod
 
 In figure \ref{fig:norms_vs_degree} we see the ill-conditioning of high-complexity design matrices using the OLS method. Large coefficients are a classic overfitting sign, which is why we move forward to testing the Ridge method with its penalty term. \\
 
-Ridge with its penalty term trades variance for bias. At small $\lambda$ we have low bias and higher variance, and this is where the model performs best on this split with p = 15. As we increase the penalty term, the coefficients are strongly shrunk and variance falls, but bias grows so test MSE and $R^2$ worsens. The curve for test MSE in \ref{fig:ridge_mse_lambda} is mostly monotone after its minimum at $10^{-4}-10^{-5}$, further shrinking the coefficients after this will add bias. 
+Ridge with its penalty term trades variance for bias. At small $\lambda$ we have low bias and higher variance, and this is where the model performs best on this split with p = 15. As we increase the penalty term, the coefficients are strongly shrunk and variance falls, but bias grows so test MSE and $R^2$ worsens. The curve for test MSE in \ref{fig:ridge_mse_lambda} is mostly monotone after its minimum at $10^{-4}-10^{-5}$, further shrinking the coefficients after this will add bias. \\
+
+Next we replaced the analytical solution that we used for the closed-form OLS and Ridge, with a plain gradient descent with a fixed learning rate. We still used the same data, with the same noise, same polynomial degree p = 15 and the same penalty term we found worked well for the Ridge method earlier. For Ridge in GD form we still use the $\alpha$-form, as in $\alpha=\frac{\lambda}{n}$. In figure \ref{fig:} we have swept over several $\eta$ values and plotted the training loss vs iterations. For OLS, the curves descend slowly, and for Ridge they descend faster, both flattening eventually. We also printed the train loss for CF and GD; we see they don't match (as they should, meaning that GD has converged completely). We might need millions of steps to make GD converge, as GD is slow on ill-conditioned problems like high-degree Runge polynomials. Fixed step GD contracts the error p slowly, even with a well chosen $\eta$. Increasing $\lambda$ improves conditioning and speeds the convergence (with $\lambda$ = 30, we reach a plateau at many less iterations). Decreasing the tolerance or increasing the iterations also help narrowing the gap between CF and GD train loss. \\
+
+
 
 \begin{figure}[H]
     \centering
@@ -354,9 +373,9 @@ Ridge with its penalty term trades variance for bias. At small $\lambda$ we have
 
 \section{Conclusion}\label{section:conclusion} 
 
-For low-noise cases and low to medium complexity, OLS works best. When introducing Ridge, we see a useful operating range of around $10^{-4}$ for this exact data, split and degree, where Ridge matches OLS but keeps coefficients smaller. However, too little shrinkage gives too large coefficients, and too much shrinkage underfits (high MSE and low $R^2$). Overall, Ridge stabilizes the degree 15 polynomial and offers a controllable bias-variance trade-off. 
+For low-noise cases and low to medium complexity, OLS works best. When introducing Ridge, we see a useful operating range of around $10^{-4}$ for this exact data, split and degree, where Ridge matches OLS but keeps coefficients smaller. However, too little shrinkage gives too large coefficients, and too much shrinkage underfits (high MSE and low $R^2$). Overall, Ridge stabilizes the degree 15 polynomial and offers a controllable bias-variance trade-off. Plain GD with a fixed learning rate works but is computationally inefficient for high degree polynomials. The learning rate $\eta$ matters, but higher $\eta$ means more progress per step, but limits speed. 
 
-begin{figure}[H]
+\begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{Project-1/Figures/.png}
     \caption{}
