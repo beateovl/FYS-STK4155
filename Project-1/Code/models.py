@@ -6,14 +6,21 @@ def predict_centered(X, theta, y_mean):
     """Add back train-mean to restore intercept."""
     return X @ np.asarray(theta).ravel() + float(y_mean)
 
-# ---------------- OLS via scikit-learn (no intercept; y is centered) ----------------
-def fit_ols(X, y_c):
+# ---------------- OLS via scikit-learn (no intercept; y is centered) and closed form ----------------
+def fit_ols_skl(X, y_c):
     """
     OLS with scikit-learn. 
     """
     model = LinearRegression(fit_intercept=False, copy_X=True)
     model.fit(X, y_c)
     return model.coef_.ravel()
+
+
+def fit_ols(X, y_c):
+    """Closed-form OLS (no intercept)."""
+    return np.linalg.lstsq(X, y_c, rcond=None)[0]
+
+
 
 # ---------------- Ridge own code and via scikit-learn (no intercept; y is centered) --------------
 
