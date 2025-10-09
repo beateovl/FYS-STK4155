@@ -360,10 +360,12 @@ OLS   & 0.040149 & 0.045871 \\
 \end{ruledtabular}
 \end{table}
 
-\subsubsection{Optimizers}
+\subsubsection{Optimizers, Lasso, SGD}
+
+In table \ref{tab:test-metrics-optimizers} we see that Adam improved on OLS the best with MSE 0.128056 and $R^2$ 0.3449 from its baseline GD at MSE = 0.132044 and $R^2$ = 0.3421. For Ridge Adam shows the best metrics as well with MSE 0.130480 and $R^2$ 03449. In figure \ref{fig:gd_optimizers} the loss curves that Adam and RMSProp drops fastest early on and keeps improving, while AdaGrad descends but stalls higher. 
 
 \begin{table}[h!]
-\caption{Test metrics by optimizer for OLS and Ridge.}
+\caption{Test metrics, GD baseline with optimizer for OLS and Ridge.}
 \label{tab:test-metrics-optimizers}
 \begin{ruledtabular}
 \begin{tabular}{lcccc}
@@ -380,13 +382,59 @@ adam     & 0.128056 & 0.3571 & 0.130480 & 0.3449 \\
 \end{ruledtabular}
 \end{table}
 
+\begin{table}[h!]
+\caption{Test metrics for Lasso variants. (SKL = scikit-learn Lasso.)}
+\label{tab:lasso-variants}
+\begin{ruledtabular}
+\begin{tabular}{lcc}
+Method & MSE & $R^2$ \\
+\colrule
+ISTA/GD    & 0.153787 & 0.2279 \\
+SKL     & 0.129139 & 0.3517 \\
+PGD     & 0.137124 & 0.3116 \\
+FISTA   & 0.128733 & 0.3537 \\
+RMSProp & 0.134195 & 0.3263 \\
+Adam    & 0.133778 & 0.3284 \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+% --- Mini-batch test metrics by optimizer (OLS vs Ridge) ---
+\begin{table}[h!]
+\caption{Test metrics, sgd baseline, OLS and Ridge with optimizers.}
+\label{tab:mb-optimizers-1000}
+\begin{ruledtabular}
+\begin{tabular}{lcccc} 
+Optimizer & \multicolumn{2}{c}{OLS (mini-batch)} & \multicolumn{2}{c}{Ridge (mini-batch)} \\
+\colrule
+ & MSE & $R^2$ & MSE & $R^2$ \\
+\colrule
+sgd       & 0.142868 & 0.2827 & 0.140808 & 0.2931 \\
+momentum  & 0.143477 & 0.2797 & 0.139641 & 0.2989 \\
+adagrad   & 0.155100 & 0.2213 & 0.155068 & 0.2215 \\
+rmsprop   & 0.146386 & 0.2651 & 0.146255 & 0.2657 \\
+adam      & 0.146501 & 0.2645 & 0.146678 & 0.2636 \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+With Lasso variants we see in \ref{tab:lasso-variants} more variance in MSE and $R^2$, with FISTA giving the best metrics with the scikit-learn lasso right behind. 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\linewidth]{Project-1/Figures/.png}
+    \includegraphics[width=1\linewidth]{Project-1/Figures/Part_c_d_e_f_GD_optimizers_loss_curves.png}
     \caption{}
-    \label{fig:}
+    \label{fig:gd_optimizers}
 \end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{Project-1/Figures/Part_f_SGD_all_optimizers_loss_curves.png}
+    \caption{}
+    \label{fig:sgd_optimizers}
+\end{figure}
+
+
 
 \subsection{Discussion}
 
@@ -400,7 +448,9 @@ Next we replaced the analytical solution that we used for the closed-form OLS an
 
 In table \ref{tab:test-ols-ridge} the results from GD are compared to the CF metrics. For OLS we see that GD attains a slightly lower MSE score than CF despite a higher training loss, as seen in table \ref{tab:train-ols-ridge}, meaning we most likely stopped the GD before reaching full convergence. On Ridge, the CF solution performs best. Since Ridge already shrinks the coefficients with the chosen $\lambda$, we get extra under-fitting with GD. We see that if $\eta$ is too small, GD converges slowly and can stop far from the optimum. If $\eta$ is too large, GD can oscillate or diverge. We also printed the train loss for CF and GD; we see they don't match (as they should, meaning that GD has converged completely).
 
-Our results show that our chosen $\eta$ and iteration number gave us only partial convergence. For OLS it acted helpfully, but for Ridge we need a tuned $\eta$ or iteration number to close the gap between Gd and CF training loss. We might need millions of steps to make GD converge, as GD is slow on ill-conditioned problems like high-degree Runge polynomials. Increasing $\lambda$ also speeds up the convergence. 
+Our results show that our chosen $\eta$ and iteration number gave us only partial convergence. For OLS it acted helpfully, but for Ridge we need a tuned $\eta$ or iteration number to close the gap between Gd and CF training loss. We might need millions of steps to make GD converge, as GD is slow on ill-conditioned problems like high-degree Runge polynomials. Increasing $\lambda$ also speeds up the convergence. \\
+
+Continuing with GD but introducing optimizers show a small improvement in MSE and $R^2$, especially by Adam and RMSProp. Adam/RMSProp adapt steps per coordinate using running moments, effectively taking larger stable steps in flatter directions and smaller steps in steep directions, which gives us a faster drop in loss and better generalization. AdaGrad underperforms because its denominator grows monotonically making steps shrink steadily, so it oftens plateaus too high on stationary problems like least squares. 
 
 
 
