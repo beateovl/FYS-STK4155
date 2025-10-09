@@ -9,13 +9,12 @@ def grad_ols(X, y, theta):
     r = X @ theta - y
     return (X.T @ r) / X.shape[0]
 
-def grad_ridge(X, y, theta, lam, n_factor=True):
-    """
-    Ridge gradient for loss (1/2n)||Xθ - y||^2 + (α/2)||θ||^2.
-    If n_factor=True, interpret lam as λ and use α = λ/n (matches closed-form).
-    """
-    alpha = (lam / X.shape[0]) if n_factor else lam
-    return grad_ols(X, y, theta) + alpha * theta
+
+def grad_ridge(X, y_c, theta, lam, n_factor=True):
+    n = X.shape[0]
+    alpha = (lam / n) if n_factor else lam
+    r = X @ theta - y_c
+    return (X.T @ r) / n + alpha * theta
 
 # --------------- Lasso GD ------------------
 def lasso_gd(X, y, theta, eta, lmbda, Niterations):
@@ -76,17 +75,13 @@ def loss_ols(X, y, theta):
     r = X @ theta - y
     return 0.5 * (r @ r) / X.shape[0]
 
-""" def loss_ridge(X, y, theta, lam, n_factor=True):
-    n = X.shape[0]
-    alpha = alpha_from_lambda(lam, n, n_factor)
-    r = X @ theta - y
-    return 0.5 * (r @ r) / n + 0.5 * alpha * (theta @ theta) """
 
 def loss_ridge(X, y, theta, lam, n_factor=True):
     n = X.shape[0]
     alpha = (lam / n) if n_factor else lam
     r = X @ theta - y
     return 0.5 * (r @ r) / n + 0.5 * alpha * (theta @ theta)
+
 
 # ---------- GD supporting loss tracking ----------
 def gd(X, y, eta, iters, theta0=None, lam=None, n_factor=True,

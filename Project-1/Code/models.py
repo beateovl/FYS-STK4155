@@ -16,15 +16,31 @@ def fit_ols(X, y_c):
     return model.coef_.ravel()
 
 # ---------------- Ridge own code and via scikit-learn (no intercept; y is centered) --------------
-def fit_ridge(X, y_c, lam):
+
+def fit_ridge(X, y_c, lam, n_factor=True):
     """
-    Minimizes: (1/(2n))||Xθ - y_c||^2 + (α/2)||θ||^2 with α = λ/n.
-    Matching normal equations: (X^T X + λ I) θ = X^T y_c.
+    Ridge solution for
+        J(θ) = (1/(2n))‖Xθ - y_c‖^2 + (α/2)‖θ‖^2
+
+    If n_factor=True (default): `lam` is λ and we set α = λ/n internally.
+        Solve: (X^T X + λ I) θ = X^T y_c
+    If n_factor=False: `lam` is α directly.
+        Solve: (X^T X / n + α I) θ = (X^T y_c) / n
     """
-    XT_X = X.T @ X
-    XT_y = X.T @ y_c
-    p = X.shape[1]
-    return np.linalg.solve(XT_X + lam * np.eye(p), XT_y)
+    X = np.asarray(X, float)
+    y = np.asarray(y_c, float).ravel()
+    n, p = X.shape
+    I = np.eye(p, dtype=float)
+
+    if n_factor:             # lam is λ
+        A = X.T @ X + lam * I
+        b = X.T @ y
+    else:                    # lam is α
+        A = (X.T @ X) / n + lam * I
+        b = (X.T @ y) / n
+
+    return np.linalg.solve(A, b)
+
 
 def fit_ridge_sklearn(X, y, lam, n_factor=False, n=None, random_state=42):
     """Ridge via scikit-learn. Note: sklearn uses alpha directly (no /n)."""
@@ -82,57 +98,3 @@ def sweep_ridge(X_full, y, split_func, degree, lambdas, n_factor=True):
     return np.asarray(mses), np.asarray(r2s), np.asarray(norms)
 
 
-
-
-#OLD
-
-
-
-""" def fit_ols_sklearn(X, y):
-    ""OLS via scikit-learn (normal equations / least squares).""
-    model = LinearRegression(fit_intercept=True, copy_X=True)
-    model.fit(X, y)
-    return model  # use model.predict(Xnew)
-
-def fit_ridge_sklearn(X, y, lam, n_factor=False, n=None, random_state=42):
-    ""Ridge via scikit-learn. Note: sklearn uses alpha directly (no /n).""
-    alpha = (lam / n) if (n_factor and n is not None) else lam
-    model = Ridge(alpha=alpha, fit_intercept=True, random_state=random_state)
-    model.fit(X, y)
-    return model  # use model.predict(Xnew) """
-
-""" "Prediction functions."
-#Difference is shape between the two below
-def predict_centered(X, theta, y_mean):   
-    return X @ theta + y_mean # add back y_mean
-
-#1D 
-def predict_from_theta(X, theta, y_mean):
-    return (X @ theta).ravel() + y_mean # add back y_mean """
-
-"Sweep functions to evaluate models over hyperparameter ranges."
-""" def sweep_degree(X_full, y, split_func, deg_max=15):
-    X_tr_s, X_te_s, y_tr_c, y_te, _, y_mean = split_func(X_full, y) # split and scale
-    degrees = range(1, deg_max + 1) # degrees to try
-    mses, r2s, norms = [], [], [] # store metrics
-    for p in degrees: 
-        Xtr, Xte = X_tr_s[:, :p], X_te_s[:, :p] # use first p features  
-        theta = fit_ols(Xtr, y_tr_c) # fit OLS
-        yhat = predict_centered(Xte, theta, y_mean) # predict on test set
-        mses.append(mse(y_te, yhat)) # compute metrics
-        r2s.append(r2(y_te, yhat)) # compute metrics
-        norms.append(float(np.linalg.norm(theta))) # L2 norm of theta
-    return list(degrees), np.asarray(mses), np.asarray(r2s), np.asarray(norms) 
-
-"Ridge sweep over lambda values."
-def sweep_ridge(X_full, y, split_func, degree, lambdas, n_factor=True):
-    X_tr_s, X_te_s, y_tr_c, y_te, _, y_mean = split_func(X_full, y) # split and scale
-    Xtr, Xte = X_tr_s[:, :degree], X_te_s[:, :degree] # use first 'degree' features
-    mses, r2s, norms = [], [], [] # store metrics
-    for lam in np.asarray(lambdas): 
-        theta = fit_ridge(Xtr, y_tr_c, lam, n_factor=n_factor) # fit Ridge
-        yhat = predict_centered(Xte, theta, y_mean) # predict on test set
-        mses.append(mse(y_te, yhat)) # compute metrics
-        r2s.append(r2(y_te, yhat)) # compute metrics
-        norms.append(float(np.linalg.norm(theta))) # L2 norm of theta
-    return np.asarray(mses), np.asarray(r2s), np.asarray(norms)  """
