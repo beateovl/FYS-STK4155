@@ -457,12 +457,7 @@ adam      & 0.146501 & 0.2645 & 0.146678 & 0.2636 \\
 
 \subsubsection{K-fold Cross-Validation}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\linewidth]{Project-1/Figures/.png}
-    \caption{}
-    \label{fig:g_ols}
-\end{figure}
+
 
 \subsection{Discussion}
 
@@ -494,12 +489,6 @@ Our results show that our chosen $\eta$ and iteration number gave us only partia
 
 For low-noise cases and low to medium complexity, OLS works best. When introducing Ridge, we see a useful operating range of around $10^{-4}$ for this exact data, split and degree, where Ridge matches OLS but keeps coefficients smaller. However, too little shrinkage gives too large coefficients, and too much shrinkage underfits (high MSE and low $R^2$). Overall, Ridge stabilizes the degree 15 polynomial and offers a controllable bias-variance trade-off. Plain GD with a fixed learning rate works but is computationally inefficient for high degree polynomials. The learning rate $\eta$ matters, but higher $\eta$ means more progress per step, but limits speed. 
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\linewidth]{Project-1/Figures/.png}
-    \caption{}
-    \label{fig:}
-\end{figure}
 
 \bibliography{biblio}
 
