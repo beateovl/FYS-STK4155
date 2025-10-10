@@ -376,6 +376,10 @@ OLS   & 0.040149 & 0.045871 \\
 
 \subsubsection{Optimizers, Lasso, SGD}
 
+In Figure \ref{fig:loss_curves_gd}, GD and momentum cluster pretty tightly for OLS, while RMSProp and Adam drop faster, but RMSProp flattens out earlier, while Adam keeps descending. For Ridge, all optimizers reduce the loss more quickly, but improve the most in terms of momentum from OLS. AdaGrad is performing the worst on both models, even more than the baseline GD. \\
+
+In Figure \ref{fig:loss_curves_sgd}, we have the same loss curves as for GD. AdaGrad is still the worst-performing optimizer. We see a lot more noise in the mini-batch curves, especially for plain SGD and momentum, but all curves descend faster than the curves in figure \ref{fig:loss_curves_gd}. 
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{Project-1/Figures/Part_c_d_e_f_GD_optimizers_loss_curves.png}
@@ -390,6 +394,7 @@ OLS   & 0.040149 & 0.045871 \\
     \label{fig:loss_curves_sgd}
 \end{figure}
 
+Test metrics for GD are shown in table \ref{tab:test-metrics-optimizers}. All optimizers reach a comparable test performance. Adam is performing the best for both OLS and Ridge, while AdaGrad has the worst scores. For SGD in Table \ref{tab:mb-optimizers-1000}, we have a worse overall MSE than the GD variants, where AdaGrad underperforms for both models. 
 
 \begin{table}[h!]
 \caption{Test metrics, GD baseline with optimizer for OLS and Ridge.}
@@ -410,6 +415,27 @@ adam     & 0.128056 & 0.3571 & 0.130480 & 0.3449 \\
 \end{table}
 
 
+% --- Mini-batch test metrics by optimizer (OLS vs Ridge) ---
+\begin{table}[h!]
+\caption{Test metrics, SGD baseline, OLS and Ridge with optimizers.}
+\label{tab:mb-optimizers-1000}
+\begin{ruledtabular}
+\begin{tabular}{lcccc} 
+Optimizer & \multicolumn{2}{c}{OLS (mini-batch)} & \multicolumn{2}{c}{Ridge (mini-batch)} \\
+\colrule
+ & MSE & $R^2$ & MSE & $R^2$ \\
+\colrule
+sgd       & 0.142868 & 0.2827 & 0.140808 & 0.2931 \\
+momentum  & 0.143477 & 0.2797 & 0.139641 & 0.2989 \\
+adagrad   & 0.155100 & 0.2213 & 0.155068 & 0.2215 \\
+rmsprop   & 0.146386 & 0.2651 & 0.146255 & 0.2657 \\
+adam      & 0.146501 & 0.2645 & 0.146678 & 0.2636 \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+Lasso variants, both scikit-learn and GD, with optimizers, have more variance in their results. In table \ref{tab:lasso-variants}, FISTA and scikit-learn Lasso get the best scores, while our ISTA/GD Lasso needs to be fine-tuned to achieve more competitive metrics. 
+
 \begin{table}[h!]
 \caption{Test metrics for Lasso variants. (SKL = scikit-learn Lasso.)}
 \label{tab:lasso-variants}
@@ -427,35 +453,15 @@ Adam    & 0.133778 & 0.3284 \\
 \end{ruledtabular}
 \end{table}
 
-% --- Mini-batch test metrics by optimizer (OLS vs Ridge) ---
-\begin{table}[h!]
-\caption{Test metrics, sgd baseline, OLS and Ridge with optimizers.}
-\label{tab:mb-optimizers-1000}
-\begin{ruledtabular}
-\begin{tabular}{lcccc} 
-Optimizer & \multicolumn{2}{c}{OLS (mini-batch)} & \multicolumn{2}{c}{Ridge (mini-batch)} \\
-\colrule
- & MSE & $R^2$ & MSE & $R^2$ \\
-\colrule
-sgd       & 0.142868 & 0.2827 & 0.140808 & 0.2931 \\
-momentum  & 0.143477 & 0.2797 & 0.139641 & 0.2989 \\
-adagrad   & 0.155100 & 0.2213 & 0.155068 & 0.2215 \\
-rmsprop   & 0.146386 & 0.2651 & 0.146255 & 0.2657 \\
-adam      & 0.146501 & 0.2645 & 0.146678 & 0.2636 \\
-\end{tabular}
-\end{ruledtabular}
-\end{table}
-
-
-
-
 
 \subsubsection{Bias-Variance Trade-off}
+
+Figure \ref{fig:g_ols} shows the decomposed Bias-Variance, where $Bias^2$ first decreases as the polynomial degree increases, but then grows a little. Variance grows a little as p increases. Test MSE grows as p increases. 
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{Project-1/Figures/fig2.11_style.png}
-    \caption{}
+    \caption{Training and test MSE. }
     \label{fig:fig2.11}
 \end{figure}
 
