@@ -28,6 +28,15 @@ Project-1/
 
 
 
-Environment & setup:
+Environment, setup, requirements:
 Python 3.10+ (tested with 3.12)
+numpy>=1.22
+scipy>=1.8
+matplotlib>=3.6
+scikit-learn>=1.3
+jupyterlab>=3.6
+ipykernel>=6.20
+
+
+
 
