@@ -2,6 +2,11 @@ import numpy as np
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from Code.metrics import mse, r2
 
+"""
+models.py — fitting and prediction functions for OLS, Ridge, Lasso."""
+
+
+# ---------------- Prediction (add back y_mean) ----------------
 def predict_centered(X, theta, y_mean):
     """Add back train-mean to restore intercept."""
     return X @ np.asarray(theta).ravel() + float(y_mean)
@@ -16,6 +21,7 @@ def fit_ols_skl(X, y_c):
     return model.coef_.ravel()
 
 
+#OLS closed form
 def fit_ols(X, y_c):
     """Closed-form OLS (no intercept)."""
     return np.linalg.lstsq(X, y_c, rcond=None)[0]
@@ -23,7 +29,7 @@ def fit_ols(X, y_c):
 
 
 # ---------------- Ridge own code and via scikit-learn (no intercept; y is centered) --------------
-
+# Ridge closed form
 def fit_ridge(X, y_c, lam, n_factor=True):
     """
     Ridge solution for
@@ -48,16 +54,28 @@ def fit_ridge(X, y_c, lam, n_factor=True):
 
     return np.linalg.solve(A, b)
 
-
+#scikit learn
 def fit_ridge_sklearn(X, y, lam, n_factor=False, n=None, random_state=42):
-    """Ridge via scikit-learn. Note: sklearn uses alpha directly (no /n)."""
     alpha = (lam / n) if (n_factor and n is not None) else lam
     model = Ridge(alpha=alpha, fit_intercept=True, random_state=random_state)
     model.fit(X, y)
     return model  # use model.predict(Xnew)
 
-# ---------------- Lasso via scikit-learn (no intercept; y is centered) --------------
+# ---------------- Lasso GD and via scikit-learn (no intercept; y is centered) --------------
 
+# Lasso via gradient descent (fixed step)
+def lasso_gradient(X, y_c, lam, iters=5000, eta=1e-3, theta0=None):
+    n, p = X.shape
+    theta = np.zeros(p) if theta0 is None else theta0.copy()
+    for _ in range(iters):
+        r = X @ theta - y_c
+        grad = (2.0/n) * (X.T @ r) + lam * np.sign(theta)
+        theta -= eta * grad
+    return theta
+
+
+
+# Lasso via scikit-learn (coordinate descent)
 def fit_lasso_skl(X, y_c, lam, max_iter=20000, tol=1e-6, selection="cyclic"):
     # Our loss: (1/n)||r||^2 + lam * ||theta||_1
     # sklearn loss: (1/(2n))||r||^2 + alpha * ||theta||_1
@@ -71,6 +89,8 @@ def fit_lasso_skl(X, y_c, lam, max_iter=20000, tol=1e-6, selection="cyclic"):
     return model.coef_.ravel()
 
 # ---------------- Sweeps (unchanged signatures) ------------
+
+# Sweep over polynomial degrees for OLS
 def sweep_degree(X_full, y, split_func, deg_max):
     """
     OLS vs polynomial degree (hold-out split inside split_func).
@@ -88,6 +108,7 @@ def sweep_degree(X_full, y, split_func, deg_max):
         norms.append(float(np.linalg.norm(theta)))
     return list(degrees), np.asarray(mses), np.asarray(r2s), np.asarray(norms)
 
+# Sweep over lambdas for Ridge
 def sweep_ridge(X_full, y, split_func, degree, lambdas, n_factor=True):
     """
     Ridge vs lambda for a fixed degree (hold-out split inside split_func).
